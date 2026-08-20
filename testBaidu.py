@@ -36,7 +36,7 @@ try:
     # 6. 点击该链接，打开详情页
     second_result.click()
 
-    # 7. 等待详情页加载；若在新标签页打开则切换过去
+    # 7. 等待详情页加载；若在新标签页打开则切换过去。
     time.sleep(3)
     if len(driver.window_handles) > 1:
         driver.switch_to.window(driver.window_handles[-1])

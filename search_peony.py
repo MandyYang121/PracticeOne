@@ -5,19 +5,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
-# 0. 反检测：隐藏 Selenium 自动化指纹，降低触发验证码的概率
-options = webdriver.ChromeOptions()
-options.add_argument("--disable-blink-features=AutomationControlled")
-options.add_experimental_option("excludeSwitches", ["enable-automation"])
-options.add_experimental_option("useAutomationExtension", False)
-
 # 1. 启动 Chrome 浏览器（确保 chromedriver.exe 在 PATH 或同目录下）
-driver = webdriver.Chrome(options=options)
+driver = webdriver.Chrome()
 
 try:
     # 2. 打开 Bing
     driver.get("https://www.bing.com")
-    time.sleep(2)
 
     # 3. 等待搜索框可交互，输入关键字「牡丹花」
     search_box = WebDriverWait(driver, 10).until(
@@ -28,8 +21,8 @@ try:
     # 4. 回车搜索
     search_box.send_keys(Keys.ENTER)
 
-    # 5. 等待搜索结果加载，找到第一个搜索结果链接
-    first_result = WebDriverWait(driver, 15).until(
+    # 5. 等待搜索结果加载，找到第一个搜索结果链接。
+    first_result = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, "li.b_algo h2 a"))
     )
     result_title = first_result.text
