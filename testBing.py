@@ -21,7 +21,7 @@ try:
     # 4. 回车搜索
     search_box.send_keys(Keys.ENTER)
 
-    # 5. 等待搜索结果加载，找到第一个搜索结果链接。
+    # 5. 等待搜索结果加载，找到第一个搜索结果链接
     first_result = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, "li.b_algo h2 a"))
     )
