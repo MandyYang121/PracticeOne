@@ -25,7 +25,7 @@ try:
     # 4. 回车搜索
     search_box.send_keys(Keys.ENTER)
 
-    # 5. 等待搜索结果加载，用 find_elements 拿到所有结果链接，点第二个（下标 1）
+    # 5. 等待搜索结果加载，用 find_elements 拿到所有结果链接，点第二个（下标 1）。
     results = WebDriverWait(driver, 15).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, "h3 a"))
     )
@@ -36,7 +36,7 @@ try:
     # 6. 点击该链接，打开详情页
     second_result.click()
 
-    # 7. 等待详情页加载；若在新标签页打开则切换过去。
+    # 7. 等待详情页加载；若在新标签页打开则切换过去
     time.sleep(3)
     if len(driver.window_handles) > 1:
         driver.switch_to.window(driver.window_handles[-1])
