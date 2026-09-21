@@ -1,0 +1,8 @@
+# 忽略所有 png 图片
+*.png
+
+# 或者只忽略以 diagnose_ 开头的 png 图片
+# diagnose_*.png
+
+# 也可以同时忽略整个截图目录（如果有的话）
+# screenshots/

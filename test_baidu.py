@@ -1,51 +1,44 @@
-import undetected_chromedriver as uc
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
+import pytest
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
-import time
+from selenium.webdriver.support.ui import WebDriverWait
 
-# 1. 用 undetected_chromedriver 启动 Chrome
-#    version_main=144：指定 Chrome 主版本号，让 uc 下载匹配 144 的 chromedriver
-#    （默认会下载最新版 driver，可能和本机 Chrome 版本不一致）
-driver = uc.Chrome(version_main=144)
+from pages.baidu_page import BaiduHomePage
 
-try:
-    # 2. 打开百度
-    driver.get("https://www.baidu.com")
-    time.sleep(2)
 
-    # 3. 找到搜索框，输入关键字「牡丹花」
-    #    说明：百度首页已改版，老的 #kw 表单是隐藏的，新的可见输入框是 #chat-textarea
-    search_box = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.ID, "chat-textarea"))
-    )
-    search_box.send_keys("牡丹")
+def _close_extra_tabs(driver):
+    """关闭除第一个标签页外的所有标签页，并切回第一个。
 
-    # 4. 回车搜索
-    search_box.send_keys(Keys.ENTER)
-
-    # 5. 等待搜索结果加载，用 find_elements 拿到所有结果链接，点第二个（下标 1）
-    results = WebDriverWait(driver, 15).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "h3 a"))
-    )
-    second_result = results[1]
-    result_title = second_result.text
-    print(f"点击搜索结果：{result_title}")
-
-    # 6. 点击该链接，打开详情页
-    second_result.click()
-
-    # 7. 等待详情页加载；若在新标签页打开则切换过去
-    time.sleep(3)
-    if len(driver.window_handles) > 1:
+    三个参数化用例共享同一个浏览器(module scope)，每个用例点完结果后会把详情页
+    留在新标签页里；清理后每个用例都从单标签页的干净状态开始，避免标签页累积。
+    """
+    while len(driver.window_handles) > 1:
         driver.switch_to.window(driver.window_handles[-1])
+        driver.close()
+    driver.switch_to.window(driver.window_handles[0])
 
+
+@pytest.mark.parametrize("keyword", ["牡丹", "猫咪", "大海"])
+def test_baidu_search(driver, keyword):
+    # 清理上个用例残留的标签页，回到单标签页干净状态
+    _close_extra_tabs(driver)
+
+    # 首页搜索
+    home = BaiduHomePage(driver)
+    home.open()
+    result_page = home.search(keyword)
+
+    # 点第二个结果，若新开标签页则切换过去
+    current_handles = driver.window_handles
+    result_title = result_page.click_result(1)
+    try:
+        WebDriverWait(driver, 10).until(EC.new_window_is_opened(current_handles))
+        driver.switch_to.window(driver.window_handles[-1])
+    except TimeoutException:
+        pass
+
+    # 等详情页加载完成（标题非空）
+    WebDriverWait(driver, 10).until(lambda d: d.title)
+    assert driver.title, "详情页标题为空，未成功打开详情页"
+    print(f"点击搜索结果：{result_title}")
     print(f"当前页面标题：{driver.title}")
-    print("已成功打开详情页！")
-
-finally:
-    # 8. 关闭浏览器
-    time.sleep(2)
-    driver.quit()
-    print("浏览器已关闭。")
